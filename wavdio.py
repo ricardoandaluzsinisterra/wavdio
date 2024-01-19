@@ -1,7 +1,8 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, session
 from wavdio_services import validate_user, register_user, check_user
 
 app = Flask(__name__)
+app.secret_key = 'jese' 
 
 @app.route('/', methods=['GET', 'POST'])
 def login():
@@ -11,6 +12,7 @@ def login():
         error = check_user(username, password)
         if error:
             return render_template('login.html.j2', error=error)
+        session['username'] = username  
         return redirect(url_for('home'))
     return render_template('login.html.j2')
 
@@ -29,8 +31,6 @@ def register():
 
 @app.route('/home')
 def home():
-    # The main page of your app
+    if 'username' not in session:
+        return redirect(url_for('login')) 
     return render_template('home.html.j2')
-
-if __name__ == '__main__':
-    app.run(debug=True)

@@ -64,3 +64,24 @@ body {
     width: 125px;
     height: auto;
 }
+.menu {
+    width: 20%;
+    padding: 20px;
+    border-right: 1px solid #ccc;
+}
+.menu a {
+    display: block;
+    margin-bottom: 10px;
+}
+.main {
+    width: 80%;
+    padding: 20px;
+}
+.search-bar {
+    margin-bottom: 20px;
+}
+.songs {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-gap: 20px;
+}

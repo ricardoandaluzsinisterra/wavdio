@@ -13,10 +13,7 @@
             <input type="password" name="password" placeholder="Password" required>
             <input type="submit" value="Login">
         </form>
-        <br>
-        <form action="{{ url_for('register') }}" method="get">
-            <input type="submit" value="Register">
-        </form>
+        <p style="text-align: right; font-size: 0.8em;">Don't have an account yet? <a href="{{ url_for('register') }}" style="color: blue;">Register here.</a></p>
     </div>
 </body>
 </html>
