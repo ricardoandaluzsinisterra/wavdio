@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for
-from database import register_user
+from wavdio_services import validate_user, register_user, check_user
 
 app = Flask(__name__)
 
@@ -8,8 +8,9 @@ def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        # Here you can check the username and password
-        # If they are valid, you can redirect the user to the main page
+        error = check_user(username, password)
+        if error:
+            return render_template('login.html.j2', error=error)
         return redirect(url_for('home'))
     return render_template('login.html.j2')
 
@@ -19,13 +20,11 @@ def register():
         username = request.form.get('username')
         password = request.form.get('password')
         confirm_password = request.form.get('confirm_password')
-        if password != confirm_password:
-            error = "Passwords do not match."
-            return render_template('register.html.j2', error=error)
-        error = register_user(username, password)
+        error = validate_user(username, password, confirm_password)
         if error:
             return render_template('register.html.j2', error=error)
-        return redirect(url_for('index'))
+        register_user(username, password)
+        return redirect(url_for('login'))
     return render_template('register.html.j2')
 
 @app.route('/home')

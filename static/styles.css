@@ -56,3 +56,11 @@ body {
 .login-container form input[type="submit"]:hover {
     background-color: #0056b3;
 }
+
+.login-container img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 125px;
+    height: auto;
+}
