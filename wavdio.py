@@ -34,3 +34,23 @@ def home():
     if 'username' not in session:
         return redirect(url_for('login')) 
     return render_template('home.html.j2')
+
+@app.route('/logout')
+def logout():
+    session.pop('username', None) 
+    return redirect(url_for('login')) 
+
+@app.route('/upload')
+def upload():
+    if 'username' not in session:
+        return redirect(url_for('login')) 
+    return render_template('upload.html.j2')
+
+@app.route('/history')
+def history():
+    if 'username' not in session:
+        return redirect(url_for('login')) 
+    return render_template('history.html.j2')
+
+if __name__ == '__main__':
+    app.run(debug=True)

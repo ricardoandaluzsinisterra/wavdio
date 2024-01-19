@@ -1,7 +1,7 @@
 /*generate an apple like type of log in page*/
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f0f0f0;
+    font-family: 'San Francisco', Arial, sans-serif;
+    background-color: #fff;
     margin: 0;
     padding: 0;
     display: flex;
@@ -64,22 +64,48 @@ body {
     width: 125px;
     height: auto;
 }
+
 .menu {
-    width: 20%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 9%;
     padding: 20px;
     border-right: 1px solid #ccc;
+    z-index: 1000;
+    background-color: white;
+    height: 100vh;
 }
+
 .menu a {
     display: block;
     margin-bottom: 10px;
+    color: #000;
+    text-decoration: none;
+    font-size: 18px;
 }
+
 .main {
-    width: 80%;
+    margin-left: 10%;
+    width: 70%;
     padding: 20px;
+    padding-top: 100px;
 }
+
 .search-bar {
-    margin-bottom: 20px;
+    position: fixed;
+    top: 10px;
+    left: calc(10% + 40px);  
+    width: calc(90% - 40px);
+    padding: 10px;
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.05);
+    font-size: 18px;
+    z-index: 1000;
+    background-color: white;
 }
+
 .songs {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
