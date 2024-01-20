@@ -1,35 +1,27 @@
-import mysql.connector
+import redis
 # How do I encrypt and check passwords on my database?
 from werkzeug.security import generate_password_hash, check_password_hash
 
-db = mysql.connector.connect(
-  host="localhost",
-  user="admin",
-  password="jese",
-  database="db"
-)
+
+r=redis.Redis(host='localhost', port=6380, db=0)
 
 def validate_user(username, password, confirm_password):
-    if password != confirm_password:
-        return "Passwords do not match."
-    cursor = db.cursor()
-    cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
-    user = cursor.fetchone()
-    if user:
-        return "Registration failed. Please try again."
-    return None
+    def validate_user(username, password, confirm_password):
+        if password != confirm_password:
+            return "Passwords do not match."
+        if r.exists(f"user:{username}:password"):
+            return "Registration failed. Please try again."
+        return None
+    
 
 def register_user(username, password):
-    cursor = db.cursor()
     hashed_password = generate_password_hash(password)
-    cursor.execute("INSERT INTO users (username, password) VALUES (%s, %s)", (username, hashed_password))
-    db.commit()
+    r.set(f"user:{username}:password", hashed_password)
     return None
 
 def check_user(username, password):
-    cursor = db.cursor()
-    cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
-    user = cursor.fetchone()
-    if user and check_password_hash(user[2], password):
+    hashed_password = r.get(f"user:{username}:password")
+    if hashed_password and check_password_hash(hashed_password.decode('utf-8'), password):
         return None
-    return "Invalid username or password."
+    else:
+        return "Login failed. Please try again."
