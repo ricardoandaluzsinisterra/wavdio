@@ -4,7 +4,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 # How do I handle file uploads?
 from werkzeug.utils import secure_filename
 import os
-import datetime
+from datetime import datetime
 # How do I make the database handle the songs information
 import uuid
 
@@ -12,7 +12,6 @@ import uuid
 r=redis.Redis(host='localhost', port=6379, db=0)
 
 def validate_user(username, password, confirm_password):
-    def validate_user(username, password, confirm_password):
         if password != confirm_password:
             return "Passwords do not match."
         if r.exists(f"user:{username}:password"):
@@ -36,6 +35,8 @@ def allowed_file(filename):
     #divides the filename into two parts and checks if the second part is in the set of allowed extensions
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
     
+from datetime import datetime
+
 def handle_file_upload(request, upload_folder):
     if 'file' not in request.files:
         return None, None, None, None, 'No file part in the request'
@@ -59,15 +60,14 @@ def handle_file_upload(request, upload_folder):
         return None, None, None, None, 'A file with the same name already exists.'
     
     file.save(os.path.join(upload_folder, filename))
-    song_id = str(uuid.uuid4())
-    r.hmset(song_id, {
+    song_id = f"song:{str(uuid.uuid4())}"
+    r.hset(song_id, mapping={
         'filename': filename,
         'title': title,
         'author': author,
         'album': album,
-        'upload_time': datetime.now().isoformat()  # Add this line
+        'upload_time': datetime.now().isoformat()
     })
-    r.set(f"song:{title}", title)
     
     return filename, title, author, album, None
 
@@ -76,9 +76,40 @@ def fetch_latest_uploads():
     latest_uploads = []
     
     for key in keys:
-        if r.type(key) == 'hash':
+        key = key.decode('utf-8')  # Decode key to string
+        key_type = r.type(key).decode('utf-8')  # Decode type to string
+        if key_type == 'hash':
             song_info = r.hgetall(key)
-            latest_uploads.append(song_info)
+            # Decode bytes to strings
+            song_info = {k.decode('utf-8'): v.decode('utf-8') for k, v in song_info.items()}
+            if 'upload_time' in song_info:
+                latest_uploads.append(song_info)
+            
+    
     latest_uploads.sort(key=lambda song: song['upload_time'], reverse=True)
     
     return latest_uploads[:10]
+
+def fetch_all_songs_alphabetically():
+    keys = r.keys()
+    all_songs = []
+    
+    for key in keys:
+        key = key.decode('utf-8') 
+        key_type = r.type(key).decode('utf-8') 
+        if key_type == 'hash':
+            song_info = r.hgetall(key)
+            song_info = {k.decode('utf-8'): v.decode('utf-8') for k, v in song_info.items()}
+            song_info['key'] = key 
+            if 'title' in song_info:
+                all_songs.append(song_info)
+            
+    all_songs.sort(key=lambda song: song['title'])
+    
+    return all_songs
+
+#How can I decode the song for playback
+def fetch_song_details(song_key):
+    song_info = r.hgetall(song_key)
+    song_info = {k.decode('utf-8'): v.decode('utf-8') for k, v in song_info.items()}
+    return song_info

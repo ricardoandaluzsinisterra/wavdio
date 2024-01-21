@@ -7,13 +7,13 @@
 <body>
     <div class="menu">
         <div class="menu-content">
-            <a href="{{ url_for('home') }}"><img src="{{ url_for('static', filename='home.png') }}" alt="Home Icon"> Home</a>
+            <a href="{{ url_for('home') }}"><img src="{{ url_for('static', filename='image/home.png') }}" alt="Home Icon"> Home</a>
             <br>
-            <a href="{{ url_for('history') }}"><img src="{{ url_for('static', filename='history.png') }}" alt="History Icon"> History</a>
+            <a href="{{ url_for('history') }}"><img src="{{ url_for('static', filename='image/history.png') }}" alt="History Icon"> History</a>
             <br>
-            <a href="{{ url_for('logout') }}"><img src="{{ url_for('static', filename='logout.png') }}" alt="Logout Icon"> Logout</a>
+            <a href="{{ url_for('logout') }}"><img src="{{ url_for('static', filename='image/logout.png') }}" alt="Logout Icon"> Logout</a>
             <div class="user-info">
-                <img src="{{ url_for('static', filename='hp.jpg') }}" alt="User Picture">
+                <img src="{{ url_for('static', filename='image/hp.jpg') }}" alt="User Picture">
                 <p>{{ username }}</p>
             </div>
         </div>
@@ -40,7 +40,8 @@
             {% for upload in latest_uploads %}
             <div class="upload">
                 <h3>{{ upload.title }}</h3>
-                <p>By {{ upload.author }} from the album {{ upload.album }}</p>
+                <p>Artist: {{ upload.author }} </p>
+                <p>Album: {{ upload.album }}</p>
             </div>
             {% endfor %}
         </div>

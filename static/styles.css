@@ -221,3 +221,62 @@ body {
     text-align: center;
     margin-top: 10px;
 }
+
+.upload{
+    border-bottom: 1px solid #ccc;
+}
+
+.songs {
+    margin-top: 40px;
+    border-bottom: 1px solid #ccc; 
+}
+
+.player-page-body {
+    display: flex;
+    justify-content: space-between; /* Distribute items evenly */
+    align-items: center; /* Center items vertically */
+    height: 100vh; /* Full height of the viewport */
+}
+
+
+.player-page-body::before,
+.player-page-body::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1px; /* Adjust as needed */
+    background: #ccc; /* Adjust as needed */
+}
+
+.player-page-body::before {
+    top: 35%; /* Adjust as needed */
+}
+
+.player-page-body::after {
+    bottom: 35%; /* Adjust as needed */
+}
+
+.song-info-container {
+    position: absolute;
+    top: 50%;
+    left: 15%; /* Adjust as needed */
+    transform: translateY(-50%); /* Center vertically */
+}
+
+.player-container {
+    position: absolute;
+    top: 50%;
+    right: 10%; /* Adjust as needed */
+    transform: translateY(-50%); /* Center vertically */
+}
+
+.amplitude-play-pause {
+    width: 50px;
+    height: 50px;
+    background-color: #000;
+    color: #fff;
+    text-align: center;
+    line-height: 50px;
+    cursor: pointer;
+}
