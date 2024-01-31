@@ -6,28 +6,28 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - ./home-svc:/app
+      - ./home-svc:/root/app
 
   user-svc:
     build: ./user-svc
     ports:
       - "5001:5001"
     volumes:
-      - ./user-svc:/app
+      - ./user-svc:/root/app
 
   upload-svc:
     build: ./upload-svc
     ports:
       - "5002:5002"
     volumes:
-      - ./upload_service:/app
+      - ./upload-svc:/root/app
 
   player-svc:
     build: ./player-svc
     ports:
       - "5003:5003"
     volumes:
-      - ./player-svc:/app
+      - ./player-svc:/root/app
 
   nginx:
     build: ./nginx
