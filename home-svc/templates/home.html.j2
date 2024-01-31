@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Home</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="menu">
+        <div class="menu-content">
+            <a href="{{ url_for('history') }}"><img src="{{ url_for('static', filename='image/history.png') }}" alt="History Icon"> History</a>
+            <br>
+            <a href="{{ url_for('upload') }}"><img src="{{ url_for('static', filename='image/upload.png') }}" alt="Upload Icon"> Upload</a>
+            <br>
+            <a href="{{ url_for('logout') }}"><img src="{{ url_for('static', filename='image/logout.png') }}" alt="Logout Icon"> Logout</a>
+            <div class="user-info">
+                <img src="{{ url_for('static', filename='image/hp.jpg') }}" alt="User Picture">
+                <p>{{ username }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="main">
+        <input class="search-bar" id="search-bar" type="text" placeholder="Search">
+        <div class="songs" id="songs">
+            {% for song in all_songs %}
+            <div class="song">
+                <h3><a href="{{ url_for('player', song_key=song.key) }}">{{ song.title }}</a></h3>
+                <p>Artist: {{ song.author }} </p>
+                <p>Album: {{ song.album }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>
+<script>
+    document.getElementById('search-bar').addEventListener('keyup', function() {
+        var input, filter, songs, song, title, i, txtValue;
+        input = document.getElementById('search-bar');
+        filter = input.value.toUpperCase();
+        songs = document.getElementById('songs');
+        song = songs.getElementsByClassName('song');
+    
+        for (i = 0; i < song.length; i++) {
+            title = song[i].getElementsByTagName('h3')[0];
+            txtValue = title.textContent || title.innerText;
+            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                song[i].style.display = "";
+            } else {
+                song[i].style.display = "none";
+            }
+        }
+    });
+</script>
