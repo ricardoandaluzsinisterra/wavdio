@@ -31,9 +31,9 @@ def check_user(username, password):
         return "Login failed. Please try again."
   
 def allowed_file(filename):
-    ALLOWED_EXTENSIONS = {'mp3', 'wav', 'flac', 'aac', 'ogg', 'm4a'}
+    extensions = {'mp3', 'wav', 'flac', 'aac', 'ogg', 'm4a'}
     #divides the filename into two parts and checks if the second part is in the set of allowed extensions
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in extensions
     
 from datetime import datetime
 

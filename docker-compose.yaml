@@ -1,0 +1,29 @@
+version: '3.9'
+
+services:
+
+  home:
+    build: ./home-page-svc
+    ports:
+      - "6543:5000"
+    volumes:
+      - ./catalog-svc:/root/app
+    environment:
+      - REDIS_HOST=catalog-db
+      - REDIS_PORT=6381
+      - REDIS_PASSWORD=password
+      - SERVICE_PORT=5000
+
+  shop-front:
+    build: ./shop-front-svc
+    ports:
+      - "6544:5000"
+    volumes:
+      - ./shop-front-svc:/root/app
+  
+  product-admin:
+    build: ./product-admin-svc
+    ports:
+      - "6545:5000"
+    volumes:
+      - ./product-admin-svc:/root/app

@@ -5,6 +5,7 @@ from wavdio_services import validate_user, register_user, check_user, handle_fil
 
 app = Flask(__name__)
 app.secret_key = 'jese' 
+
 app.config['UPLOAD_FOLDER'] = './audio/'
 
 @app.route('/', methods=['GET', 'POST'])
