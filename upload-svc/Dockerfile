@@ -5,4 +5,4 @@ RUN pip install --upgrade pip
 COPY ./requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 
-CMD ["python","app/user-app.py"]
+CMD ["python","app/upload-app.py"]
