@@ -2,5 +2,4 @@ flask==3.0.0
 pytest==7.4.0
 requests==2.31.0
 redis==5.0.1
-werkzeug==3.0.0
-Flask-Session==0.3.2
+werkzeug==latest

@@ -6,29 +6,28 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - ./home-svc:/root/app
+      - ./home-svc:/app
 
   user-svc:
     build: ./user-svc
     ports:
       - "5001:5001"
     volumes:
-      - ./user-svc:/root/app
+      - ./user-svc:/app
 
   upload-svc:
     build: ./upload-svc
     ports:
       - "5002:5002"
     volumes:
-      - ./upload-svc:/root/app
-      - ./upload-svc:/root/app/audio
+      - ./upload_service:/app
 
   player-svc:
     build: ./player-svc
     ports:
       - "5003:5003"
     volumes:
-      - ./player-svc:/root/app
+      - ./player-svc:/app
 
   nginx:
     build: ./nginx
@@ -47,6 +46,3 @@ services:
     image: redis
     ports:
       - "6380:6380"
-
-volumes:
-  audio:

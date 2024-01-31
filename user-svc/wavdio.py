@@ -1,19 +1,10 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 #How can I handle the case where Redis is not running?
 from redis.exceptions import ConnectionError
-from flask_session import Session
-import redis
-from wavdio_services import validate_user, register_user, check_user
-from db_handling import handle_file_upload, fetch_latest_uploads, fetch_all_songs_alphabetically, fetch_song_details
+from wavdio_services import validate_user, register_user, check_user, handle_file_upload, fetch_latest_uploads, fetch_all_songs_alphabetically, fetch_song_details
 
 app = Flask(__name__)
 app.secret_key = 'jese' 
-
-app.config['SESSION_TYPE'] = 'redis'
-app.config['SESSION_REDIS'] = redis.Redis(host='users-db', port=6379, db=0)
-
-sess = Session()
-sess.init_app(app)
 
 app.config['UPLOAD_FOLDER'] = './audio/'
 
@@ -27,7 +18,7 @@ def login():
             if error:
                 return render_template('login.html.j2', error=error)
             session['username'] = username  
-            return redirect('/home')
+            return redirect(url_for('home'))
         return render_template('login.html.j2')
     except ConnectionError:
         return "Redis is not running. Please start Redis and try again."
@@ -47,8 +38,6 @@ def register():
         return render_template('register.html.j2')
     except ConnectionError:
         return "Redis is not running. Please start Redis and try again."
-    
-
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5001, debug=False, use_reloader=False)
+    app.run(debug=True)
