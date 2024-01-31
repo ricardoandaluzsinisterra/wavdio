@@ -7,7 +7,7 @@ services:
       - "5000:5000"
     volumes:
       - ./home-svc:/root/app
-      - ./audio:/usr/share/nginx/html/audio
+      - audio:/usr/share/nginx/html/audio
 
   user-svc:
     build: ./user-svc
@@ -22,7 +22,7 @@ services:
       - "5002:5002"
     volumes:
       - ./upload-svc:/root/app
-      - ./audio:/usr/share/nginx/html/audio
+      - audio:/usr/share/nginx/html/audio
 
   player-svc:
     build: ./player-svc
@@ -36,7 +36,7 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./audio:/usr/share/nginx/html/audio
+      - audio:/usr/share/nginx/html/audio
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
 
   users-db:
@@ -49,5 +49,5 @@ services:
     ports:
       - "6380:6380"
 
-  volumes:
-    audio:
+volumes:
+  audio:

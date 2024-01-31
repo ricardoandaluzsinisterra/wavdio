@@ -14,11 +14,16 @@ app.config['UPLOAD_FOLDER'] = './audio/'
 def player(song_key):
     try:
         if 'username' not in session:
-            return redirect(url_for('login')) 
+            return redirect('/') 
         song = fetch_song_details(song_key)
         return render_template('player.html.j2', username=session['username'], song=song)
     except ConnectionError:
         return "Redis is not running. Please start Redis and try again."
+    
+@app.route('/logout')
+def logout():
+    session.pop('username', None) 
+    return redirect(url_for('login')) 
 
 if __name__ == '__main__':
     app.run(host= '0.0.0.0', port=5003, debug=True)
