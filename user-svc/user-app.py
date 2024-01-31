@@ -19,7 +19,7 @@ def login():
             if error:
                 return render_template('login.html.j2', error=error)
             session['username'] = username  
-            return redirect(url_for('home'))
+            return redirect(('/home'))
         return render_template('login.html.j2')
     except ConnectionError:
         return "Redis is not running. Please start Redis and try again."

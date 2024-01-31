@@ -9,7 +9,7 @@ from datetime import datetime
 import uuid
 
 
-r=redis.Redis(host='songs-db', port=6380, db=0)
+r=redis.Redis(host='songs-db', port=6379, db=0)
 
 def allowed_file(filename):
     extensions = {'mp3', 'wav', 'flac', 'aac', 'ogg', 'm4a'}
