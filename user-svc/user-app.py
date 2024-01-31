@@ -39,6 +39,11 @@ def register():
         return render_template('register.html.j2')
     except ConnectionError:
         return "Redis is not running. Please start Redis and try again."
+    
+@app.route('/logout')
+def logout():
+    session.pop('username', None) 
+    return redirect(url_for('login')) 
 
 if __name__ == '__main__':
     app.run(host= '0.0.0.0', port=5001, debug=True)

@@ -13,7 +13,7 @@ app.config['UPLOAD_FOLDER'] = './audio/'
 def home():
     try:
         if 'username' not in session:
-            return redirect(url_for('login')) 
+            return redirect('/') 
         all_songs = fetch_all_songs_alphabetically()  # Fetch all songs in alphabetical order
         return render_template('home.html.j2', username=session['username'], all_songs=all_songs)
     except ConnectionError:
@@ -22,7 +22,7 @@ def home():
 @app.route('/logout')
 def logout():
     session.pop('username', None) 
-    return redirect(url_for('login')) 
+    return redirect(url_for('login'))  
 
 if __name__ == '__main__':
     app.run(host= '0.0.0.0', port=5000, debug=True)
