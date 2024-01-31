@@ -7,7 +7,7 @@ from db_handling import handle_file_upload, fetch_latest_uploads, fetch_all_song
 app = Flask(__name__)
 app.secret_key = 'jese' 
 
-app.config['UPLOAD_FOLDER'] = './audio/'
+app.config['UPLOAD_FOLDER'] = '/usr/share/nginx/html/audio'
 
 
 @app.route('/upload', methods=['GET', 'POST'])

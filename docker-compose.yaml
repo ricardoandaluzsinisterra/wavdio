@@ -7,6 +7,7 @@ services:
       - "5000:5000"
     volumes:
       - ./home-svc:/root/app
+      - ./audio:/usr/share/nginx/html/audio
 
   user-svc:
     build: ./user-svc
@@ -21,6 +22,7 @@ services:
       - "5002:5002"
     volumes:
       - ./upload-svc:/root/app
+      - ./audio:/usr/share/nginx/html/audio
 
   player-svc:
     build: ./player-svc
@@ -46,3 +48,6 @@ services:
     image: redis
     ports:
       - "6380:6380"
+
+  volumes:
+    audio:
