@@ -29,4 +29,4 @@ def upload():
         return "Redis is not running. Please start Redis and try again."
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host= '0.0.0.0', port=5002, debug=True)
