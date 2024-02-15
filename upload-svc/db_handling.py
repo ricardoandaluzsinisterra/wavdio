@@ -7,9 +7,17 @@ import os
 from datetime import datetime
 # How do I make the database handle the songs information
 import uuid
+import requests
 
 
-r=redis.Redis(host='songs-db', port=6379, db=0)
+def get_db_dump():
+    response = requests.get('http://catalog-svc:5004/dump')
+    if response.status_code == 200:
+        return response.json()
+    else:
+        raise Exception(f'Failed to get DB dump: {response.status_code}')
+
+r = get_db_dump()
 
 def allowed_file(filename):
     extensions = {'mp3', 'wav', 'flac', 'aac', 'ogg', 'm4a'}

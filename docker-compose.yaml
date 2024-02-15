@@ -30,6 +30,14 @@ services:
       - "5003:5003"
     volumes:
       - ./player-svc:/root/app
+  
+  catalog-svc:
+    build: ./catalog-svc
+    ports:
+      - "5004:5004"
+    volumes:
+      - ./catalog-svc:/root/app
+      - audio:/usr/share/nginx/html/audio
 
   nginx:
     build: ./nginx
