@@ -9,12 +9,22 @@ users_db = redis.Redis(host='users-db', port=6379, db=0)
 
 @app.route('/songs', methods=['GET'])
 def get_songs():
+    print('get songs method called')
     title = request.args.get('title')
+    sort = request.args.get('sort')
+    order = request.args.get('order')
+
+    keys = songs_db.keys('song:*')
+
     if title:
-        keys = songs_db.keys(f'song:*:{title}')
-    else:
-        keys = songs_db.keys('song:*')
-    data = {key.decode('utf-8'): json.loads(r.get(key).decode('utf-8')) for key in keys}
+        # Filter keys by title
+        keys = [key for key in keys if json.loads(songs_db.get(key).decode('utf-8'))['title'] == title]
+
+    if sort and order:
+        # Sort and order keys
+        keys.sort(key=lambda x: json.loads(songs_db.get(x).decode('utf-8'))[sort], reverse=(order=='desc'))
+
+    data = {key.decode('utf-8'): json.loads(songs_db.get(key).decode('utf-8')) for key in keys}
     return jsonify(data), 200
 
 @app.route('/songs', methods=['POST'])
@@ -22,7 +32,7 @@ def add_song():
     song_data = request.get_json()
     if not song_data:
         return jsonify({'message': 'Invalid request'}), 400
-    r.set(f'song:{song_data["id"]}', json.dumps(song_data))
+    songs_db.set(f'song:{song_data["id"]}', json.dumps(song_data))
     return jsonify(song_data), 201
 
 @app.route('/songs/<song_id>', methods=['GET'])
@@ -48,4 +58,4 @@ def get_user(username):
     return jsonify(json.loads(user_data.decode('utf-8'))), 200
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5004)
+    app.run(host='0.0.0.0', port=5004, debug=True)

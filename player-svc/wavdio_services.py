@@ -1,24 +1,32 @@
-import redis
-# How do I encrypt and check passwords on my database?
+import requests
 from werkzeug.security import generate_password_hash, check_password_hash
 
-r=redis.Redis(host='users-db', port=6379, db=0)
-
 def validate_user(username, password, confirm_password):
-        if password != confirm_password:
-            return "Passwords do not match."
-        if r.exists(f"user:{username}:password"):
-            return "Registration failed. Please try again."
-        return None
+    if password != confirm_password:
+        return "Passwords do not match."
+    response = requests.get(f'http://catalog-svc:5004/users/{username}')
+    if response.status_code == 200 and response.json():
+        return "Registration failed. Please try again."
+    return None
 
 def register_user(username, password):
     hashed_password = generate_password_hash(password)
-    r.set(f"user:{username}:password", hashed_password)
+    user_data = {
+        'username': username,
+        'password': hashed_password
+    }
+    response = requests.post('http://catalog-svc:5004/users', json=user_data)
+    if response.status_code != 201:
+        raise Exception(f'Failed to register user: {response.status_code}')
     return None
 
 def check_user(username, password):
-    hashed_password = r.get(f"user:{username}:password")
-    if hashed_password and check_password_hash(hashed_password.decode('utf-8'), password):
+    response = requests.get(f'http://catalog-svc:5004/users/{username}')
+    if response.status_code != 200:
+        return "Login failed. Please try again."
+    user = response.json()
+    hashed_password = user.get('password')
+    if hashed_password and check_password_hash(hashed_password, password):
         return None
     else:
         return "Login failed. Please try again."
