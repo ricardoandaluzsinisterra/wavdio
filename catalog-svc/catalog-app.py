@@ -13,17 +13,13 @@ def get_songs():
     title = request.args.get('title')
     sort = request.args.get('sort')
     order = request.args.get('order')
-
     keys = songs_db.keys('song:*')
-
     if title:
         # Filter keys by title
         keys = [key for key in keys if json.loads(songs_db.get(key).decode('utf-8'))['title'] == title]
-
     if sort and order:
         # Sort and order keys
         keys.sort(key=lambda x: json.loads(songs_db.get(x).decode('utf-8'))[sort], reverse=(order=='desc'))
-
     data = {key.decode('utf-8'): json.loads(songs_db.get(key).decode('utf-8')) for key in keys}
     return jsonify(data), 200
 

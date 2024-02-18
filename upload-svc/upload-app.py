@@ -23,7 +23,7 @@ def upload():
         response = requests.get('http://catalog-svc:5004/songs?sort=upload_time&order=desc&limit=10')
         if response.status_code != 200:
             raise Exception(f'Failed to fetch latest uploads: {response.status_code}')
-        latest_uploads = response.json()
+        latest_uploads = (response.json().values())
         return render_template('upload.html.j2', username=session['username'], latest_uploads=latest_uploads)
     except requests.exceptions.RequestException:
         return "catalog-svc is not running. Please start catalog-svc and try again."

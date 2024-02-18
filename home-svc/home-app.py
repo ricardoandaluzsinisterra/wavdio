@@ -13,12 +13,9 @@ def home():
         if 'username' not in session:
             return redirect('/') 
         response = requests.get('http://catalog-svc:5004/songs?sort=title&order=asc')
-        print(f'Response status code: {response.status_code}')  # New print statement
-        print(f'Response text: {response.text}')  # New print statement
         if response.status_code != 200:
             raise Exception(f'Failed to fetch all songs: {response.status_code}')
         all_songs = list(response.json().values())
-        print(all_songs)
         return render_template('home.html.j2', username=session['username'], all_songs=all_songs)
     except requests.exceptions.RequestException:
         return "catalog-svc is not running. Please start catalog-svc and try again."
