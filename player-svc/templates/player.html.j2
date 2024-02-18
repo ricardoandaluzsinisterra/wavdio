@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Player</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <!-- Menu -->
+    <div class="menu">
+        <div class="menu-content">
+            <a href="/home"><img src="{{ url_for('static', filename='image/home.png') }}" alt="Home Icon"> Home</a>
+            <br>
+            <a href="/upload"><img src="{{ url_for('static', filename='image/upload.png') }}" alt="Upload Icon"> Upload</a>
+            <br>
+            <a href="{{ url_for('logout') }}"><img src="{{ url_for('static', filename='image/logout.png') }}" alt="Logout Icon"> Logout</a>
+            <div class="user-info">
+                <img src="{{ url_for('static', filename='image/hp.jpg') }}" alt="User Picture">
+                <p>{{ username }}</p>
+            </div>
+        </div>
+    </div>
+    <main class='player-page-body'>
+        <div class="player-container">
+            <!-- Song Info -->
+            <div class="song-info">
+                <h1>{{ song.title }}</h1>
+                <p>Artist: {{ song.author }}</p>
+                <p>Album: {{ song.album }}</p>
+            </div>
+
+            <!-- AmplitudeJS Player -->
+            <div class="amplitude-player">
+                <div class="amplitude-song-info">
+                    <div amplitude-song-info="name" amplitude-main-song-info="true"></div>
+                    <div amplitude-song-info="artist" amplitude-main-song-info="true"></div>
+                </div>
+                <div class="amplitude-play-pause" amplitude-main-play-pause="true"></div>
+                <div class="amplitude-song-slider-container">
+                    <span class="amplitude-current-time" amplitude-main-current-time="true"></span>
+                    <input type="range" class="amplitude-song-slider" amplitude-main-song-slider="true"/>
+                    <span class="amplitude-duration" amplitude-main-duration="true"></span>
+                </div>
+                <input type="range" class="amplitude-volume-slider" amplitude-main-volume-slider="true" step=".1"/>
+            </div>
+        </div>
+    </main>
+    <!-- Include AmplitudeJS and initialize it with your song details -->
+    <script src="https://cdn.jsdelivr.net/npm/amplitudejs@5.2.0/dist/amplitude.min.js"></script>
+    <script>
+        Amplitude.init({
+            "songs": [
+                {
+                    "name": "{{ song.title }}",
+                    "artist": "{{ song.author }}",
+                    "album": "{{ song.album }}",
+                    "url": "{{ url_for('static', filename='audio/' + song.filename) }}"
+                }
+            ],
+            "autoplay": true // Enable autoplay
+        });
+    </script>
+</body>
+</html>
