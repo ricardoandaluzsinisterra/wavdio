@@ -12,7 +12,7 @@ def home():
     try:
         if 'username' not in session:
             return redirect('/') 
-        response = requests.get('http://catalog-svc:5004/songs?sort=title&order=asc')
+        response = requests.get('http://localhost/catalog/songs?sort=title&order=asc')
         if response.status_code != 200:
             raise Exception(f'Failed to fetch all songs: {response.status_code}')
         all_songs = list(response.json().values())

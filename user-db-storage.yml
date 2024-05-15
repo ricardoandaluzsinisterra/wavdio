@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: user-db-pv2
+  name: user-db-pv
 spec:
   capacity:
     storage: 100Mi
@@ -17,7 +17,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: user-db-pvc2
+  name: user-db-pvc
 spec:
   storageClassName: manual
   resources:

@@ -5,6 +5,11 @@ metadata:
   labels:
     name: app-ingress
 spec:
+  defaultBackend:
+    service:
+      name: user
+      port:
+        number: 5000
   rules:
   - host: localhost
     http:

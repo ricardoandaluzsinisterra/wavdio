@@ -30,7 +30,7 @@ def handle_file_upload(request, upload_folder):
         filename = secure_filename(file.filename)
 
         # Check if a song with the same title already exists
-        response = requests.get(f'http://catalog-svc:5004/songs?title={title}')
+        response = requests.get(f'http://localhost/catalog/songs?title={title}')
         if response.status_code == 200 and response.json():
             return None, None, None, None, 'A song with the same title already exists.'
 
@@ -45,7 +45,7 @@ def handle_file_upload(request, upload_folder):
             'album': album,
             'upload_time': datetime.now().isoformat()
         }
-        response = requests.post('http://catalog-svc:5004/songs', json=song_data)
+        response = requests.post('http://localhost/catalog/songs', json=song_data)
         if response.status_code != 201:
             raise Exception(f'Failed to add song: {response.status_code}')
 

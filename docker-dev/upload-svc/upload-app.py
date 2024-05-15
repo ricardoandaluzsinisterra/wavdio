@@ -5,7 +5,7 @@ from db_handling import handle_file_upload
 app = Flask(__name__)
 app.secret_key = 'jese' 
 
-app.config['UPLOAD_FOLDER'] = '/usr/share/nginx/html/audio'
+app.config['UPLOAD_FOLDER'] = 'mnt/songs'
 
 @app.route('/upload', methods=['GET', 'POST'])
 def upload():
@@ -20,7 +20,7 @@ def upload():
                 success_message = f"Uploaded {title} by {author} from the album {album}."
                 return render_template('upload.html.j2', username=session['username'], success=success_message)
         # Fetch the latest uploads from catalog-svc
-        response = requests.get('http://catalog-svc:5004/songs?sort=upload_time&order=desc&limit=10')
+        response = requests.get('http://localhost/catalog/songs?sort=upload_time&order=desc&limit=10')
         if response.status_code != 200:
             raise Exception(f'Failed to fetch latest uploads: {response.status_code}')
         latest_uploads = (response.json().values())
@@ -34,4 +34,4 @@ def logout():
     return redirect(url_for('login')) 
 
 if __name__ == '__main__':
-    app.run(host= '0.0.0.0', port=5002, debug=True)
+    app.run(host= '0.0.0.0', port=5000, debug=True)

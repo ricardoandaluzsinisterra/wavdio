@@ -17,7 +17,7 @@ def login():
             if error:
                 return render_template('login.html.j2', error=error)
             session['username'] = username  
-            return redirect(('/home'))
+            return redirect(('https://localhost/'))
         return render_template('login.html.j2')
     except RequestException:
         return "catalog-svc is not running. Please start catalog-svc and try again."
@@ -44,4 +44,4 @@ def logout():
     return redirect(url_for('login')) 
 
 if __name__ == '__main__':
-    app.run(host= '0.0.0.0', port=5001, debug=True)
+    app.run(host= '0.0.0.0', port=5000, debug=True)
