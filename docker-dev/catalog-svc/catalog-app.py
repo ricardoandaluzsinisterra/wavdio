@@ -1,15 +1,19 @@
 from flask import Flask, jsonify, request
 import redis
 import json
+import logging
 
 app = Flask(__name__)
+
+logging.basicConfig(filename='app.log', level=logging.INFO)
+
 
 songs_db = redis.Redis(host='songs-db', port=6379, db=0)
 users_db = redis.Redis(host='users-db', port=6379, db=0)
 
 @app.route('/songs', methods=['GET'])
 def get_songs():
-    print('get songs method called')
+    logging.info('get songs method called')
     title = request.args.get('title')
     sort = request.args.get('sort')
     order = request.args.get('order')
@@ -25,6 +29,7 @@ def get_songs():
 
 @app.route('/songs', methods=['POST'])
 def add_song():
+    logging.info('add song method called')
     song_data = request.get_json()
     if not song_data:
         return jsonify({'message': 'Invalid request'}), 400
@@ -33,6 +38,7 @@ def add_song():
 
 @app.route('/songs/<song_id>', methods=['GET'])
 def get_song(song_id):
+    logging.info(f'get song method called with id {song_id}')
     song_data = songs_db.get(f'song:{song_id}')
     if not song_data:
         return jsonify({'message': 'Song not found'}), 404
@@ -40,6 +46,7 @@ def get_song(song_id):
 
 @app.route('/users', methods=['POST'])
 def add_user():
+    logging.info('add user method called')
     user_data = request.get_json()
     if not user_data:
         return jsonify({'message': 'Invalid request'}), 400
@@ -48,6 +55,7 @@ def add_user():
 
 @app.route('/users/<username>', methods=['GET'])
 def get_user(username):
+    logging.info(f'get user method called with username {username}')
     user_data = users_db.get(f'user:{username}')
     if not user_data:
         return jsonify({'message': 'User not found'}), 404
