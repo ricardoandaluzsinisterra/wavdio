@@ -5,7 +5,7 @@ from db_handling import handle_file_upload
 app = Flask(__name__)
 app.secret_key = 'jese' 
 
-app.config['UPLOAD_FOLDER'] = 'mnt/songs'
+app.config['UPLOAD_FOLDER'] = '/home/docker/data/songs'
 
 @app.route('/upload', methods=['GET', 'POST'])
 def upload():
