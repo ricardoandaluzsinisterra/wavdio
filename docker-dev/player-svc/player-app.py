@@ -4,7 +4,7 @@ import requests
 app = Flask(__name__)
 app.secret_key = 'jese' 
 
-app.config['UPLOAD_FOLDER'] = './audio/'
+app.config['UPLOAD_FOLDER'] = '/home/docker/data/songs'
 
 @app.route('/player/<song_key>')
 def player(song_key):
