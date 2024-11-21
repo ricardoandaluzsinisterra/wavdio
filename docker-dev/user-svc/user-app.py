@@ -19,8 +19,8 @@ def login():
             session['username'] = username  
             return redirect(('https://localhost/'))
         return render_template('login.html.j2')
-    except RequestException:
-        return "catalog-svc is not running. Please start catalog-svc and try again."
+    except Exception as e:
+        return f"An error has occurred: \n{e}"
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -35,8 +35,8 @@ def register():
             register_user(username, password)
             return redirect(url_for('login'))
         return render_template('register.html.j2')
-    except RequestException:
-        return "catalog-svc is not running. Please start catalog-svc and try again."
+    except Exception as e:
+        return f"An error has occurred: \n{e}"
     
 @app.route('/logout')
 def logout():
