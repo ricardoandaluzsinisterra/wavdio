@@ -2,7 +2,7 @@ version: '3.9'
 
 services:
   home-svc:
-    image: ricardoandaluz/wavdio:home
+    build: ./home-svc
     ports:
       - "5000:5000"
     volumes:
@@ -10,14 +10,14 @@ services:
       - audio:/usr/share/nginx/html/audio
 
   user-svc:
-    image: ricardoandaluz/wavdio:user
+    build: ./user-svc
     ports:
       - "5001:5001"
     volumes:
       - ./user-svc:/root/app
 
   upload-svc:
-    image: ricardoandaluz/wavdio:upload
+    build: ./upload-svc
     ports:
       - "5002:5002"
     volumes:
@@ -25,14 +25,14 @@ services:
       - audio:/usr/share/nginx/html/audio
 
   player-svc:
-    image: ricardoandaluz/wavdio:player
+    build: ./player-svc
     ports:
       - "5003:5003"
     volumes:
       - ./player-svc:/root/app
   
   catalog-svc:
-    image: ricardoandaluz/wavdio:catalog
+    build: ./catalog-svc
     ports:
       - "5004:5004"
     volumes:

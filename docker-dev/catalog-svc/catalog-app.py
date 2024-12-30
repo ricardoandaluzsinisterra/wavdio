@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, request
+from kafka import KafkaProducer
 import redis
 import json
 import logging
@@ -7,9 +8,12 @@ app = Flask(__name__)
 
 logging.basicConfig(filename='app.log', level=logging.INFO)
 
-
 songs_db = redis.Redis(host='songs-db', port=6379, db=0)
 users_db = redis.Redis(host='users-db', port=6379, db=0)
+
+# Kafka producer configuration
+producer = KafkaProducer(bootstrap_servers='kafka:9092',
+                         value_serializer=lambda v: json.dumps(v).encode('utf-8'))
 
 @app.route('/songs', methods=['GET'])
 def get_songs():
@@ -33,7 +37,8 @@ def add_song():
     song_data = request.get_json()
     if not song_data:
         return jsonify({'message': 'Invalid request'}), 400
-    songs_db.set(f'song:{song_data["id"]}', json.dumps(song_data))
+    producer.send('songs', key=song_data['id'].encode('utf-8'), value=song_data)
+    producer.flush()
     return jsonify(song_data), 201
 
 @app.route('/songs/<song_id>', methods=['GET'])
@@ -50,7 +55,8 @@ def add_user():
     user_data = request.get_json()
     if not user_data:
         return jsonify({'message': 'Invalid request'}), 400
-    users_db.set(f'user:{user_data["username"]}', json.dumps(user_data))
+    producer.send('users', key=user_data['username'].encode('utf-8'), value=user_data)
+    producer.flush()
     return jsonify(user_data), 201
 
 @app.route('/users/<username>', methods=['GET'])
