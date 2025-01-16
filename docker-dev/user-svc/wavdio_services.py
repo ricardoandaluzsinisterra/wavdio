@@ -1,6 +1,7 @@
 import requests
 from exceptions import *
 from werkzeug.security import generate_password_hash, check_password_hash
+from user_consumer import *
 
 def validate_user(username, password, confirm_password):
     if password != confirm_password:
@@ -22,7 +23,7 @@ def register_user(username, password):
     return None
 
 def check_user(username, password):
-    response = requests.get(f'http://localhost/catalog/users/{username}')
+    response = requests.get(f'/catalog/users/{username}')
     if response.status_code != 200:
         raise LoginError("Login failed. Please try again.")
     user = response.json()

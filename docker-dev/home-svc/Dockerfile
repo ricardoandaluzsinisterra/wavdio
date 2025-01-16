@@ -1,9 +1,9 @@
-FROM python:3.12.0
+FROM python:3.9
+WORKDIR /app
+COPY . .
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY home-app.py .
+EXPOSE 443
 
-WORKDIR /root
-RUN pip install --upgrade pip
-COPY ./requirements.txt requirements.txt
-RUN pip install -r requirements.txt
-EXPOSE 5000
-
-CMD ["python","app/home-app.py"]
+CMD ["python", "home-app.py"]

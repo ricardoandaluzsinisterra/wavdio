@@ -1,20 +1,15 @@
-# How do I encrypt and check passwords on my database?
 from werkzeug.security import generate_password_hash, check_password_hash
-# How do I handle file uploads?
 from werkzeug.utils import secure_filename
 import os
 from datetime import datetime
-# How do I make the database handle the songs information
 import uuid
 import requests
 
 def allowed_file(filename):
     extensions = {'mp3', 'wav', 'flac', 'aac', 'ogg', 'm4a'}
-    # Divides the filename into two parts and checks if the second part is in the set of allowed extensions
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in extensions
 
 def handle_file_upload(request, upload_folder):
-    # Check if the a file was uploaded before processing it
     if 'file' not in request.files:
         return None, None, None, None, 'No file part in the request.'
 
@@ -51,4 +46,4 @@ def handle_file_upload(request, upload_folder):
 
         return filename, title, author, album, None
 
-    return None, None, None, None, 'Allowed file types are txt, pdf, png, jpg, jpeg, gif.'
+    return None, None, None, None, 'Allowed file types are mp3, wav, flac, aac, ogg, m4a.'

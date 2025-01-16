@@ -37,7 +37,9 @@ def add_song():
     song_data = request.get_json()
     if not song_data:
         return jsonify({'message': 'Invalid request'}), 400
-    producer.send('songs', key=song_data['id'].encode('utf-8'), value=song_data)
+    song_id = song_data['id']
+    songs_db.set(f'song:{song_id}', json.dumps(song_data))
+    producer.send('songs', key=song_id.encode('utf-8'), value=song_data)
     producer.flush()
     return jsonify(song_data), 201
 
@@ -55,7 +57,9 @@ def add_user():
     user_data = request.get_json()
     if not user_data:
         return jsonify({'message': 'Invalid request'}), 400
-    producer.send('users', key=user_data['username'].encode('utf-8'), value=user_data)
+    username = user_data['username']
+    users_db.set(f'user:{username}', json.dumps(user_data))
+    producer.send('users', key=username.encode('utf-8'), value=user_data)
     producer.flush()
     return jsonify(user_data), 201
 
@@ -68,4 +72,4 @@ def get_user(username):
     return jsonify(json.loads(user_data.decode('utf-8'))), 200
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(ssl_context=('certs/cert.pem', 'certs/key.pem'), host='0.0.0.0', port=443)
