@@ -1,51 +1,60 @@
-version: '3.9'
-
 services:
   home-svc:
-    image: ricardoandaluz/wavdio:home
+    build: ./home-svc
     ports:
       - "5000:5000"
     volumes:
       - ./home-svc:/root/app
-      - audio:/usr/share/nginx/html/audio
+      - audio_storage:/usr/share/nginx/html/audio
 
   user-svc:
-    image: ricardoandaluz/wavdio:user
+    build: ./user-svc
     ports:
       - "5001:5001"
     volumes:
       - ./user-svc:/root/app
 
   upload-svc:
-    image: ricardoandaluz/wavdio:upload
+    build: ./upload-svc
     ports:
       - "5002:5002"
     volumes:
       - ./upload-svc:/root/app
-      - audio:/usr/share/nginx/html/audio
+      - audio_storage:/usr/share/nginx/html/audio
 
   player-svc:
-    image: ricardoandaluz/wavdio:player
+    build: ./player-svc
     ports:
       - "5003:5003"
     volumes:
       - ./player-svc:/root/app
+      - audio_storage:/usr/share/nginx/html/audio
   
   catalog-svc:
-    image: ricardoandaluz/wavdio:catalog
+    build: ./catalog-svc
     ports:
       - "5004:5004"
     volumes:
       - ./catalog-svc:/root/app
-      - audio:/usr/share/nginx/html/audio
+      - audio_storage:/usr/share/nginx/html/audio
+    depends_on:
+      - kafka
 
   nginx:
     build: ./nginx
     ports:
       - "80:80"
+      - "443:443"
     volumes:
-      - audio:/usr/share/nginx/html/audio
+      - audio_storage:/usr/share/nginx/html/audio
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/certs:/etc/nginx/certs
+    depends_on:
+      - home-svc
+      - user-svc
+      - upload-svc
+      - player-svc
+      - catalog-svc
 
   users-db:
     image: redis
@@ -57,5 +66,46 @@ services:
     ports:
       - "6380:6380"
 
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_SYNC_LIMIT: 2
+    volumes:
+      - zookeeper_data:/var/lib/zookeeper/data
+      - zookeeper_log:/var/lib/zookeeper/log
+    restart: unless-stopped
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+    restart: unless-stopped
+    depends_on:
+      - zookeeper
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics.sh --bootstrap-server localhost:9092 --list"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
 volumes:
-  audio:
+  audio_storage:
+  kafka_data:
+  zookeeper_data:
+  zookeeper_log:

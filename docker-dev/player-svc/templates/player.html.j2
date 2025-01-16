@@ -47,16 +47,37 @@
     <!-- Include AmplitudeJS and initialize it with your song details -->
     <script src="https://cdn.jsdelivr.net/npm/amplitudejs@5.2.0/dist/amplitude.min.js"></script>
     <script>
-        Amplitude.init({
-            "songs": [
-                {
-                    "name": "{{ song.title }}",
-                    "artist": "{{ song.author }}",
-                    "album": "{{ song.album }}",
-                    "url": "{{ url_for('static', filename='audio/' + song.filename) }}"
-                }
-            ],
-            "autoplay": true // Enable autoplay
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("Initializing AmplitudeJS...");
+            
+            Amplitude.init({
+                "songs": [
+                    {
+                        "name": "{{ song.title }}",
+                        "artist": "{{ song.author }}",
+                        "album": "{{ song.album }}",
+                        "url": "/audio/{{ song.filename }}",
+                        "volume": 50
+                    }
+                ],
+                "callbacks": {
+                    "canplay": function() {
+                        console.log("Audio can be played");
+                    },
+                    "error": function(err) {
+                        console.error("AmplitudeJS error:", err);
+                    }
+                },
+                "debug": true
+            });
+            
+            // Add error handling for audio element
+            const audio = document.querySelector('audio');
+            if (audio) {
+                audio.onerror = function() {
+                    console.error("Audio error:", audio.error);
+                };
+            }
         });
     </script>
 </body>

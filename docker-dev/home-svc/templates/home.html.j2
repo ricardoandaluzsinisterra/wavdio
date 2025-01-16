@@ -9,7 +9,7 @@
         <div class="menu-content">
             <a href="{{ url_for('home') }}"><img src="{{ url_for('static', filename='image/home.png') }}" alt="Home Icon"> Home</a>
             <br>
-            <a href="/upload"><img src="{{ url_for('static', filename='image/upload.png') }}" alt="Upload Icon"> Upload</a>
+            <a href="https://localhost/upload"><img src="{{ url_for('static', filename='image/upload.png') }}" alt="Upload Icon"> Upload</a>
             <br>
             <a href="{{ url_for('logout') }}"><img src="{{ url_for('static', filename='image/logout.png') }}" alt="Logout Icon"> Logout</a>
             <div class="user-info">
@@ -23,7 +23,7 @@
         <div class="songs" id="songs">
             {% for song in all_songs %}
             <div class="song">
-                <h3><a href="/player/{{ song.id }}">{{ song.title }}</a></h3>
+                <h3><a href="https://localhost/player/{{ song.title }}">{{ song.title }}</a></h3>
                 <p>Artist: {{ song.author }} </p>
                 <p>Album: {{ song.album }}</p>
             </div>
