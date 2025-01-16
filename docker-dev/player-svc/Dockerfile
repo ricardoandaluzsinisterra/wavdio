@@ -5,4 +5,4 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 EXPOSE 443
 
-CMD ["python", "player-app.py"]
+CMD ["python", "main.py"]

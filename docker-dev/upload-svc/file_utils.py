@@ -20,9 +20,7 @@ def song_exists(song):
             raise SongError("There is already a copy on this song in the system")
 
 def allowed_file(filename):
-    extensions = {'mp3', 'wav', 'flac', 'aac', 'ogg', 'm4a'}
-    # Divides the filename into two parts and checks if the second part is in the set of allowed extensions
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in extensions
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() == 'mp3'
 
 def handle_file_upload(request, upload_folder):
     global songs
@@ -33,6 +31,9 @@ def handle_file_upload(request, upload_folder):
 
     file = request.files['file']
 
+    if not allowed_file(file.filename):
+        raise TypeError("Allowed file type is mp3")
+    
     if file.filename == '':
         raise FileNotFoundError("No file selected")
 
@@ -41,19 +42,16 @@ def handle_file_upload(request, upload_folder):
         author = request.form.get('author')
         album = request.form.get('album')
 
-        song = Song(title=title, artist=author, album=album)
+        song = Song(title=title, author=author, album=album)
         song_exists(song)
 
-        # Save the file
-        filename = secure_filename(file.filename)
+        #
+        filename = f"{title}.mp3"
         file.save(os.path.join(upload_folder, filename))
-
-        response = requests.post('https://catalog/songs', json=song.to_dict())
+        
+        response = requests.post('https://catalog-svc/songs', json=song.to_dict(), verify=False)
         if response.status_code != 201:
             raise SongError(f'Failed to add song: {response.status_code}, {response.text}')
 
         songs.append(song)
 
-        return filename, title, author, album, None
-
-    raise TypeError('Allowed file types are mp3, wav, flac, aac, ogg, m4a.')

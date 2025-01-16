@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 import song_consumer
 import threading
+import logging
 
 
 app = Flask(__name__)
@@ -8,11 +9,13 @@ app.secret_key = 'jese'
 
 app.config['UPLOAD_FOLDER'] = './audio/'
 
-
 def fetch_songs_periodically():
+    logger = logging.getLogger(__name__)
+    logger.info("Starting Kafka consumer thread...")
     thread = threading.Thread(target=song_consumer.consume_songs)
-    thread.daemon = True  # This ensures the thread will exit when the main program exits
+    thread.daemon = True
     thread.start()
+    logger.info("Kafka consumer thread started")
 
 @app.route('/home')
 def home():
@@ -20,6 +23,7 @@ def home():
         if 'username' not in session:
             return redirect('/')
         songs = song_consumer.get_songs()
+        logging.info(f"Retrieved {len(songs)} songs from consumer")
         return render_template('home.html.j2', username=session['username'], all_songs=songs)
     except Exception as e:
         return f"An error occurred: {str(e)}"

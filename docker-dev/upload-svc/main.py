@@ -1,42 +1,56 @@
 from flask import Flask, render_template, request, redirect, url_for, session
-import requests
 import threading
 from file_utils import handle_file_upload
 import song_consumer
+import logging
 
 app = Flask(__name__)
-app.secret_key = 'jese' 
+app.secret_key = 'jese'
 
-app.config['UPLOAD_FOLDER'] = '/home/docker/data/songs'
+app.config['UPLOAD_FOLDER'] = '/usr/share/nginx/html/audio'
 
 def fetch_songs_periodically():
+    logger = logging.getLogger(__name__)
+    logger.info("Starting Kafka consumer thread...")
     thread = threading.Thread(target=song_consumer.consume_songs)
-    thread.daemon = True  # This ensures the thread will exit when the main program exits
+    thread.daemon = True
     thread.start()
+    logger.info("Kafka consumer thread started")
 
 @app.route('/upload', methods=['GET', 'POST'])
 def upload():
     try:
         if 'username' not in session:
-            return redirect(url_for('login')) 
+            return redirect(url_for('login'))
+
         if request.method == 'POST':
-            filename, title, author, album, error = handle_file_upload(request, app.config['UPLOAD_FOLDER'])
-            if error:
-                return render_template('upload.html.j2', username=session['username'], error=error)
-            if filename:
-                success_message = f"Uploaded {title} by {author} from the album {album}."
-                return render_template('upload.html.j2', username=session['username'], success=success_message)
-        # Fetch the latest uploads from catalog-svc
-        latest_uploads = sorted(song_consumer.get_songs(), key=lambda song: song.upload_time, reverse=True)
-        return render_template('upload.html.j2', username=session['username'], latest_uploads=latest_uploads)
-    except requests.exceptions.RequestException as e:
-        return f"catalog-svc is not running. Please start catalog-svc and try again. {e}"
-    
+            handle_file_upload(request, app.config['UPLOAD_FOLDER'])
+            title = request.form.get('title')
+            author = request.form.get('author')
+            album = request.form.get('album')
+            success_message = f"Uploaded {title} by {author} from the album {album}."
+            logging.info(success_message)
+            return render_template('upload.html.j2', username=session['username'], success=success_message)
+
+        songs = song_consumer.get_songs()
+        logging.info(f"Retrieved {len(songs)} songs from consumer")
+        latest_uploads = sorted(songs, key=lambda s: s.upload_time, reverse=True)
+        logging.info(f"Latest uploads: {latest_uploads}")
+
+        return render_template('upload.html.j2', 
+                            username=session['username'], 
+                            latest_uploads=latest_uploads)
+
+    except Exception as e:
+        logging.error(f"Error during upload: {str(e)}")
+        return render_template('upload.html.j2', username=session['username'],error=str(e))
+
 @app.route('/logout')
 def logout():
-    session.pop('username', None) 
-    return redirect(url_for('login')) 
+    session.pop('username', None)
+    return redirect(url_for('login'))
 
 if __name__ == '__main__':
+    # Start the song consumer in the background when the app runs
     fetch_songs_periodically()
     app.run(ssl_context=('certs/cert.pem', 'certs/key.pem'), host='0.0.0.0', port=443)

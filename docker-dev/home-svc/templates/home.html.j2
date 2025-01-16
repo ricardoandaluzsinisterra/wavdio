@@ -23,7 +23,7 @@
         <div class="songs" id="songs">
             {% for song in all_songs %}
             <div class="song">
-                <h3><a href="/player/{{ song.id }}">{{ song.title }}</a></h3>
+                <h3><a href="https://localhost/player/{{ song.title }}">{{ song.title }}</a></h3>
                 <p>Artist: {{ song.author }} </p>
                 <p>Album: {{ song.album }}</p>
             </div>

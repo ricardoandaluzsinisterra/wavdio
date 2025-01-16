@@ -3,7 +3,7 @@ from kafka import KafkaProducer
 import redis
 import json
 import logging
-import Song
+from Song import Song
 
 app = Flask(__name__)
 
@@ -18,6 +18,12 @@ producer = KafkaProducer(bootstrap_servers='kafka:9092',
 
 TOPIC_NAME = 'songs'
 
+def on_send_success(record_metadata):
+    logging.info(f"Message successfully sent to {record_metadata.topic} with offset {record_metadata.offset}")
+    
+def on_send_error(excp):
+    logging.error(f"Error sending message: {excp}")
+
 def send_all_songs_to_kafka():
     logging.info('Sending all songs to Kafka...')
     
@@ -25,7 +31,6 @@ def send_all_songs_to_kafka():
     
     for key in keys:
         song_data = json.loads(songs_db.get(key).decode('utf-8'))
-        
         producer.send(TOPIC_NAME, value=song_data) 
         logging.info(f"Produced song {song_data['title']} to Kafka topic {TOPIC_NAME}")
 
@@ -36,21 +41,25 @@ def add_song():
     logging.info('Adding song...')
     song_data = request.get_json()
     if not song_data:
-        return jsonify({'message': 'Invalid request'}), 400
+        return jsonify({'message': 'Invalid request, no data provided.'}), 400
 
     try:
         # Deserialize the incoming JSON into a Song object
-        song = Song.from_dict(song_data)
+        song = Song.from_dictionary(song_data)
         
-        if songs_db.get(f'song:{song.id}'):
-            return jsonify({'message': 'Song already exists'}), 409
-        
-        songs_db.set(f'song:{song.id}', json.dumps(song.to_dict()))
-        
-        producer.send('songs', key=str(song.id).encode('utf-8'), value=song.to_dict())
+        songs_db.set(f'song:{song.title}', json.dumps(song.to_dict()))
+        logging.info(f"Set song in DB: {song.title}")
+        logging.info(f"Song in DB after set: {songs_db.get(f'song:{song.title}')}")
+
+        producer.send('songs', key=str(song.title).encode('utf-8'), value=song.to_dict()).add_callback(on_send_success).add_errback(on_send_error)
         producer.flush()
 
-        logging.info(f"Produced new song {song.id} to Kafka topic 'songs'")
+        logging.info(f"Produced new song {song.title} to Kafka topic 'songs'")
+        song_key = f'song:{song.title}'
+        logging.info(f"Attempting to retrieve song with key: {song_key}")
+        song_data = songs_db.get(song_key)
+        logging.info(f"Song data retrieved: {song_data}")
+        logging.info(f"Current songs in DB: {songs_db.keys()}")
         return jsonify(song.to_dict()), 201
 
     except Exception as e:
