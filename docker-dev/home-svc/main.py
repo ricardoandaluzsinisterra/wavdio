@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session
-from file_utils import handle_file_upload
 import song_consumer
+import threading
+
 
 app = Flask(__name__)
 app.secret_key = 'jese'
@@ -24,14 +25,8 @@ def home():
         return f"An error occurred: {str(e)}"
 
 
-@app.route('/upload', methods=['GET', 'POST'])
-def upload():
-    if request.method == 'POST':
-        filename, title, author, album, error = handle_file_upload(request, app.config['UPLOAD_FOLDER'])
-        if error:
-            return f"An error occurred: {error}"
-        return redirect(url_for('home'))
-    return render_template('upload.html.j2')
+#Why was there an upload method here?
+
 
 @app.route('/logout')
 def logout():
@@ -39,4 +34,5 @@ def logout():
     return redirect(url_for('login'))
 
 if __name__ == '__main__':
+    fetch_songs_periodically()
     app.run(ssl_context=('certs/cert.pem', 'certs/key.pem'), host='0.0.0.0', port=443)

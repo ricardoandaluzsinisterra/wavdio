@@ -9,9 +9,9 @@
         <div class="menu-content">
             <a href="{{ url_for('home') }}"><img src="{{ url_for('static', filename='image/home.png') }}" alt="Home Icon"> Home</a>
             <br>
-            <a href="/upload"><img src="{{ url_for('static', filename='image/upload.png') }}" alt="Upload Icon"> Upload</a>
+            <a href="https://localhost/upload"><img src="{{ url_for('static', filename='image/upload.png') }}" alt="Upload Icon"> Upload</a>
             <br>
-            <a href="{{ url_for('logout') }}"><img src="{{ url_for('static', filename='image/Logout.png') }}" alt="Logout Icon"> Logout</a>
+            <a href="{{ url_for('logout') }}"><img src="{{ url_for('static', filename='image/logout.png') }}" alt="Logout Icon"> Logout</a>
             <div class="user-info">
                 <img src="{{ url_for('static', filename='image/hp.jpg') }}" alt="User Picture">
                 <p>{{ username }}</p>

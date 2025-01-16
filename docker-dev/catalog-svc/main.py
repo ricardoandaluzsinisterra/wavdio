@@ -3,6 +3,7 @@ from kafka import KafkaProducer
 import redis
 import json
 import logging
+import Song
 
 app = Flask(__name__)
 
@@ -36,11 +37,25 @@ def add_song():
     song_data = request.get_json()
     if not song_data:
         return jsonify({'message': 'Invalid request'}), 400
-    song_id = song_data['id']
-    songs_db.set(f'song:{song_id}', json.dumps(song_data))
-    producer.send('songs', key=song_id.encode('utf-8'), value=song_data)
-    producer.flush()
-    logging.info(f"Produced new song {song_id} to Kafka topic 'songs'")
+
+    try:
+        # Deserialize the incoming JSON into a Song object
+        song = Song.from_dict(song_data)
+        
+        if songs_db.get(f'song:{song.id}'):
+            return jsonify({'message': 'Song already exists'}), 409
+        
+        songs_db.set(f'song:{song.id}', json.dumps(song.to_dict()))
+        
+        producer.send('songs', key=str(song.id).encode('utf-8'), value=song.to_dict())
+        producer.flush()
+
+        logging.info(f"Produced new song {song.id} to Kafka topic 'songs'")
+        return jsonify(song.to_dict()), 201
+
+    except Exception as e:
+        logging.error(f"Error adding song: {str(e)}")
+        return jsonify({'message': f'Failed to add song: {str(e)}'}), 500
 
 @app.route('/users', methods=['POST'])
 def add_user():
