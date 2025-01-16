@@ -15,25 +15,24 @@ users_db = redis.Redis(host='users-db', port=6379, db=0)
 producer = KafkaProducer(bootstrap_servers='kafka:9092',
                          value_serializer=lambda v: json.dumps(v).encode('utf-8'))
 
-@app.route('/songs', methods=['GET'])
-def get_songs():
-    logging.info('get songs method called')
-    title = request.args.get('title')
-    sort = request.args.get('sort')
-    order = request.args.get('order')
+TOPIC_NAME = 'songs'
+
+def send_all_songs_to_kafka():
+    logging.info('Sending all songs to Kafka...')
+    
     keys = songs_db.keys('song:*')
-    if title:
-        # Filter keys by title
-        keys = [key for key in keys if json.loads(songs_db.get(key).decode('utf-8'))['title'] == title]
-    if sort and order:
-        # Sort and order keys
-        keys.sort(key=lambda x: json.loads(songs_db.get(x).decode('utf-8'))[sort], reverse=(order=='desc'))
-    data = {key.decode('utf-8'): json.loads(songs_db.get(key).decode('utf-8')) for key in keys}
-    return jsonify(data), 200
+    
+    for key in keys:
+        song_data = json.loads(songs_db.get(key).decode('utf-8'))
+        
+        producer.send(TOPIC_NAME, value=song_data) 
+        logging.info(f"Produced song {song_data['title']} to Kafka topic {TOPIC_NAME}")
+
+    producer.flush()
 
 @app.route('/songs', methods=['POST'])
 def add_song():
-    logging.info('add song method called')
+    logging.info('Adding song...')
     song_data = request.get_json()
     if not song_data:
         return jsonify({'message': 'Invalid request'}), 400
@@ -41,15 +40,7 @@ def add_song():
     songs_db.set(f'song:{song_id}', json.dumps(song_data))
     producer.send('songs', key=song_id.encode('utf-8'), value=song_data)
     producer.flush()
-    return jsonify(song_data), 201
-
-@app.route('/songs/<song_id>', methods=['GET'])
-def get_song(song_id):
-    logging.info(f'get song method called with id {song_id}')
-    song_data = songs_db.get(f'song:{song_id}')
-    if not song_data:
-        return jsonify({'message': 'Song not found'}), 404
-    return jsonify(json.loads(song_data.decode('utf-8'))), 200
+    logging.info(f"Produced new song {song_id} to Kafka topic 'songs'")
 
 @app.route('/users', methods=['POST'])
 def add_user():
@@ -72,4 +63,5 @@ def get_user(username):
     return jsonify(json.loads(user_data.decode('utf-8'))), 200
 
 if __name__ == '__main__':
+    send_all_songs_to_kafka()
     app.run(ssl_context=('certs/cert.pem', 'certs/key.pem'), host='0.0.0.0', port=443)

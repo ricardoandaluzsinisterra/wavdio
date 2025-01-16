@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from requests.exceptions import RequestException
-from wavdio_services import validate_user, register_user, check_user
+from user_authentication import validate_user, register_user, check_user
 
 app = Flask(__name__)
 app.secret_key = 'jese' 
@@ -13,14 +13,12 @@ def login():
         if request.method == 'POST':
             username = request.form.get('username')
             password = request.form.get('password')
-            error = check_user(username, password)
-            if error:
-                return render_template('login.html.j2', error=error)
-            session['username'] = username  
-            return redirect(('https://localhost/'))
+            check_user(username, password)
+            session['username'] = username
+            return redirect(('https://localhost/home'))
         return render_template('login.html.j2')
     except Exception as e:
-        return f"An error has occurred: \n{e}"
+        return render_template('login.html.j2', error=e)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -29,14 +27,12 @@ def register():
             username = request.form.get('username')
             password = request.form.get('password')
             confirm_password = request.form.get('confirm_password')
-            error = validate_user(username, password, confirm_password)
-            if error:
-                return render_template('register.html.j2', error=error)
+            validate_user(username, password, confirm_password)
             register_user(username, password)
             return redirect(url_for('login'))
         return render_template('register.html.j2')
     except Exception as e:
-        return f"An error has occurred: \n{e}"
+        return render_template('register.html.j2', error=e)
     
 @app.route('/logout')
 def logout():
