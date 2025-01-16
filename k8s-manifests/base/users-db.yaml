@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: users-db
+spec:
+  serviceName: "users-db"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: users-db
+  template:
+    metadata:
+      labels:
+        app: users-db
+    spec:
+      containers:
+      - name: users-db
+        image: redis
+        ports:
+        - containerPort: 6379
+        volumeMounts:
+        - name: users-db-storage
+          mountPath: /data
+  volumeClaimTemplates:
+  - metadata:
+      name: users-db-storage
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: users-db-svc
+spec:
+  selector:
+    app: users-db
+  ports:
+    - port: 6379
+      targetPort: 6379

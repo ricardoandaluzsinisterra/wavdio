@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-depl
+  labels:
+    app: user-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user-depl
+  template:
+    metadata:
+      labels:
+        app: user-depl
+    spec:
+      containers:
+      - name: user-depl
+        image: ricardoandaluz/user:v5
+        ports:
+        - containerPort: 443
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+        env:
+        - name: KAFKA_SERVER
+          value: "kafka-svc.default.svc.cluster.local:9092"
+        volumeMounts:
+        - name: audio-storage
+          mountPath: /usr/share/nginx/html/audio
+      volumes:
+      - name: audio-storage
+        persistentVolumeClaim:
+          claimName: audio-storage-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-svc
+  labels:
+    app: user-depl
+spec:
+  type: ClusterIP
+  ports:
+    - port: 443
+      targetPort: 443
+      protocol: TCP
+  selector:
+    app: user-depl

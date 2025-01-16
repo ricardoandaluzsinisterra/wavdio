@@ -1,9 +1,9 @@
 from kafka import KafkaConsumer, TopicPartition
-from kafka.errors import KafkaError
 from Song import Song 
 import json
 import logging
 import time
+import os
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 
 TOPIC_NAME = 'songs'
 RETRY_INTERVAL = 5
+KAFKA_SERVER = os.getenv("KAFKA_SERVER", "kafka:9092")
 MAX_RETRIES = 5
 songs_data = {}
 
@@ -18,7 +19,7 @@ def create_consumer():
     for attempt in range(MAX_RETRIES):
         try:
             consumer = KafkaConsumer(
-                bootstrap_servers='kafka:9092',
+                bootstrap_servers=KAFKA_SERVER,
                 group_id='song-group',
                 auto_offset_reset='earliest',
                 enable_auto_commit=True,

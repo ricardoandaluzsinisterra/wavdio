@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: songs-db
+spec:
+  serviceName: "songs-db"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: songs-db
+  template:
+    metadata:
+      labels:
+        app: songs-db
+    spec:
+      containers:
+      - name: songs-db
+        image: redis
+        ports:
+        - containerPort: 6379
+        volumeMounts:
+        - name: songs-db-storage
+          mountPath: /data
+  volumeClaimTemplates:
+  - metadata:
+      name: songs-db-storage
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: songs-db-svc
+spec:
+  selector:
+    app: songs-db
+  ports:
+    - port: 6379
+      targetPort: 6379
+---

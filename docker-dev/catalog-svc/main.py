@@ -4,16 +4,22 @@ import redis
 import json
 import logging
 from Song import Song
+import os
 
 app = Flask(__name__)
 
+SONGS_REDIS_HOST = os.getenv("SONGS_REDIS_HOST")
+USERS_REDIS_HOST = os.getenv("USERS_REDIS_HOST")
+
 logging.basicConfig(filename='app.log', level=logging.INFO)
 
-songs_db = redis.Redis(host='songs-db', port=6379, db=0)
-users_db = redis.Redis(host='users-db', port=6379, db=0)
+songs_db = redis.Redis(host=SONGS_REDIS_HOST, port=6379, db=0)
+users_db = redis.Redis(host=USERS_REDIS_HOST, port=6379, db=0)
+
+KAFKA_SERVER = os.getenv("KAFKA_SERVER", "kafka:9092")
 
 # Kafka producer configuration
-producer = KafkaProducer(bootstrap_servers='kafka:9092',
+producer = KafkaProducer(bootstrap_servers=KAFKA_SERVER,
                          value_serializer=lambda v: json.dumps(v).encode('utf-8'))
 
 TOPIC_NAME = 'songs'
