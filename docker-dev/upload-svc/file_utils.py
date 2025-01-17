@@ -49,7 +49,7 @@ def handle_file_upload(request, upload_folder):
         filename = f"{title}.mp3"
         file.save(os.path.join(upload_folder, filename))
         
-        response = requests.post('https://catalog-svc/songs', json=song.to_dict(), verify=False)
+        response = requests.post('https://localhost/catalog/songs', json=song.to_dict(), verify=False)
         if response.status_code != 201:
             raise SongError(f'Failed to add song: {response.status_code}, {response.text}')
 

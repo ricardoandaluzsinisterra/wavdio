@@ -1,33 +1,46 @@
 import subprocess
+import json
+from pathlib import Path
 
-def docker_build(service_path, repo, service, build_env="dev"):
-    hub_repo = f"ricardoandaluz/{repo}"  # Remove global, make it local
-    build_command = f"docker build --build-arg build_env={build_env} -t {hub_repo}:{service} {service_path}"
+def get_latest_version(service):
+    version_file = Path("versions.json")
+    if version_file.exists():
+        with open(version_file) as f:
+            versions = json.load(f)
+            return versions.get(service, 0)
+    return 0
+
+def update_version(service, version):
+    version_file = Path("versions.json")
+    versions = {}
+    if version_file.exists():
+        with open(version_file) as f:
+            versions = json.load(f)
+    versions[service] = version
+    with open(version_file, "w") as f:
+        json.dump(versions, f)
+
+def docker_build(service_path, service, build_env="dev"):
+    current_version = get_latest_version(service) + 1
+    hub_repo = f"ricardoandaluz/{service}"
+    tag = f"v{current_version}"
+    
+    build_command = f"docker build --build-arg build_env={build_env} -t {hub_repo}:{tag} {service_path}"
     
     result = subprocess.run(build_command, shell=True, capture_output=True, text=True)
     print(result.stderr)
     
-    # Return the full image name for pushing later
-    return f"{hub_repo}:{service}"
+    update_version(service, current_version)
+    return f"{hub_repo}:{tag}"
 
-# Define repos for each service
-repos = {
-    "catalog": "repo1",
-    "home": "repo2",
-    "player": "repo3",
-    "upload": "repo4",
-    "user": "repo5"
-}
-
+# List of services
+services = ["catalog", "home", "player", "upload", "user"]
 build_env = 'prod'  # or 'dev' depending on your needs
 
 # Build and collect image names
 images = {
-    "catalog": docker_build("./catalog-svc", repos["catalog"], "catalog", build_env),
-    "home": docker_build("./home-svc", repos["home"], "home", build_env),
-    "player": docker_build("./player-svc", repos["player"], "player", build_env),
-    "upload": docker_build("./upload-svc", repos["upload"], "upload", build_env),
-    "user": docker_build("./user-svc", repos["user"], "user", build_env)
+    service: docker_build(f"./{service}-svc", service, build_env)
+    for service in services
 }
 
 # Push each image

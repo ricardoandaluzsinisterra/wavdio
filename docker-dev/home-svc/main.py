@@ -21,7 +21,7 @@ def fetch_songs_periodically():
 def home():
     try:
         if 'username' not in session:
-            return redirect('/')
+            return redirect('https://localhost/')
         songs = song_consumer.get_songs()
         logging.info(f"Retrieved {len(songs)} songs from consumer")
         return render_template('home.html.j2', username=session['username'], all_songs=songs)

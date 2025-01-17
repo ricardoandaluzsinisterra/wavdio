@@ -1,0 +1,22 @@
+resources:
+  - catalog-dpl.yaml
+  - elastic.yml
+  - fluent-bit-configmap.yml
+  - fluent-bit-ds.yml
+  - fluent-bit-role-binding.yml
+  - fluent-bit-role.yml
+  - fluent-bit-service-account.yml
+  - home-dpl.yaml
+  - ingress-controller.yml
+  - kafka-pvc.yml
+  - kafka-statefulset.yml
+  - kafka-vpa.yml
+  - kibana.yml
+  - load-balancers.yml
+  - metallb-config.yml
+  - player-depl.yaml
+  - songs-db.yaml
+  - upload-depl.yaml
+  - user-depl.yaml
+  - users-db.yaml
+  - audio-storage.yaml

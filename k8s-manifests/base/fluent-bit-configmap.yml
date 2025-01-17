@@ -1,0 +1,104 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fluent-bit-config
+  namespace: logging
+data:
+  fluent-bit.conf: |-
+    # Set location of parsers file
+    [SERVICE]
+        Parsers_File parsers.conf
+
+    # Input for logs from mqtt-to-kafka deployment
+    [INPUT]
+        Name tail
+        Path /var/log/containers/*mqtt-to-kafka*.log
+        Tag app.mqtt-to-kafka
+
+    # Input for logs from kafka-to-prometheus deployment
+    [INPUT]
+        Name tail
+        Path /var/log/containers/*kafka-to-prometheus*.log
+        Tag app.kafka-to-prometheus
+
+    # Parse mqtt-to-kafka logs
+    [FILTER]
+        Name parser
+        Match app.mqtt-to-kafka
+        Parser mqtt_kafka_parser
+        Key_Name log
+
+    # Parse kafka-to-prometheus logs
+    [FILTER]
+        Name parser
+        Match app.kafka-to-prometheus
+        Parser kafka_prometheus_parser
+        Key_Name log
+
+    # Reformat mqtt-to-kafka logs for more readability
+    [FILTER]
+        Name modify
+        Match app.mqtt-to-kafka
+        Add key readable_log "MQTT to Kafka Log: ${timestamp} - Room: ${room}, Temp: ${temperature}°C, CO: ${carbon_monoxide}, Smoke: ${smoke}"
+
+    [FILTER]
+        Name modify
+        Match app.kafka-to-prometheus
+        # For Received messages (e.g., sensor data)
+        Add key readable_log "Received sensor data for ${room}: Temperature ${temperature}°C, CO: ${carbon_monoxide}, Smoke: ${smoke}, Humidity: ${humidity}, LPG: ${liquid_petroleum_gas}, Motion Detected: ${motion_detected}, Light: ${light}"
+        
+        # For Updated metric logs
+        Add key readable_log "Updated ${metric_type} metric for ${room}: ${value}"
+
+
+    # Output to stdout for debugging
+    [OUTPUT]
+        Name es
+        Match *
+        Host quickstart-es-http.logging.svc.cluster.local
+        Port 9200
+        HTTP_User elastic
+        HTTP_Passwd AW7JHmq15Z9RH38k1885gWhG
+        Index fluent-bit
+        Suppress_Type_Name On
+        Include_Tag_Key On
+
+  parsers.conf: |-
+    [PARSER]
+        # Parser for mqtt-to-kafka logs
+        Name mqtt_kafka_parser
+        Format regex
+        Regex ^(?<level>INFO|ERROR|DEBUG):(?<source>__main__):(?<message>.*): (?<log_json>{.*})$
+        Time_Key timestamp
+        Time_Format %s
+        Decode_Field_As json log_json log
+
+        # Explicitly define fields you're interested in
+        Decode_Field_As json log_json.room room
+        Decode_Field_As json log_json.timestamp timestamp
+        Decode_Field_As json log_json.temperature temperature
+        Decode_Field_As json log_json.carbon_monoxide carbon_monoxide
+        Decode_Field_As json log_json.smoke smoke
+
+    [PARSER]
+        # Parser for kafka-to-prometheus logs
+        Name kafka_prometheus_parser
+        Format regex
+        Regex ^(?<level>INFO|ERROR|DEBUG):(?<source>__main__):(?<message>(Received message: (?<log_json>{.*}))|(Updated (?<metric_type>.*) metric for (?<room>.*): (?<value>.*)))$
+        Time_Key timestamp
+        Time_Format %s
+        Decode_Field_As json log_json log
+
+        # Explicitly define fields you're interested in
+        Decode_Field_As json log_json.room room
+        Decode_Field_As json log_json.timestamp timestamp
+        Decode_Field_As json log_json.temperature temperature
+        Decode_Field_As json log_json.carbon_monoxide carbon_monoxide
+        Decode_Field_As json log_json.smoke smoke
+        Decode_Field_As json log_json.humidity humidity
+        Decode_Field_As json log_json.light light
+        Decode_Field_As json log_json.liquid_petroleum_gas liquid_petroleum_gas
+        Decode_Field_As json log_json.motion_detected motion_detected
+        Decode_Field_As json metric_type metric_type
+        Decode_Field_As json value value
+
