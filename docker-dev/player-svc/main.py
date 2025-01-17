@@ -4,9 +4,12 @@ import logging
 import threading
 import os
 
-app = Flask(__name__)
+static_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
+
+app = Flask(__name__, 
+           static_folder=static_folder,
+           static_url_path='/static')
 app.secret_key = 'jese'
-logging.basicConfig(level=logging.DEBUG)
 
 def fetch_songs_periodically():
     logger = logging.getLogger(__name__)

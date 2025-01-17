@@ -1,0 +1,21 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: vpa-tls-certs
+  namespace: kube-system
+spec:
+  secretName: vpa-tls-certs
+  duration: 8760h
+  renewBefore: 720h
+  commonName: vpa-webhook
+  issuerRef:
+    name: self-signed
+    kind: Issuer
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: self-signed
+  namespace: kube-system
+spec:
+  selfSigned: {}

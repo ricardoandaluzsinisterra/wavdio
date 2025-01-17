@@ -33,17 +33,17 @@ def docker_build(service_path, service, build_env="dev"):
     update_version(service, current_version)
     return f"{hub_repo}:{tag}"
 
-# List of services
-services = ["catalog", "home", "player", "upload", "user"]
-build_env = 'prod'  # or 'dev' depending on your needs
 
-# Build and collect image names
+services = ["catalog", "home", "player", "upload", "user"]
+build_env = 'prod'
+
+
 images = {
     service: docker_build(f"./{service}-svc", service, build_env)
     for service in services
 }
 
-# Push each image
+
 for service, image in images.items():
     push_command = f"docker push {image}"
     result = subprocess.run(push_command, shell=True, capture_output=True, text=True)

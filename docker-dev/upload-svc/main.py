@@ -3,11 +3,29 @@ import threading
 from file_utils import handle_file_upload
 import song_consumer
 import logging
+import os
 
-app = Flask(__name__)
+
+logger = logging.getLogger(__name__)
+
+static_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
+app = Flask(__name__, 
+           static_folder=static_folder,
+           static_url_path='/static')
 app.secret_key = 'jese'
 
+app.config.update(
+    SESSION_COOKIE_SECURE=True,
+    SESSION_COOKIE_SAMESITE='None',
+)
+
 app.config['UPLOAD_FOLDER'] = '/usr/share/nginx/html/audio'
+
+@app.before_request
+def debug_session():
+    logger.debug(f"Session username: {session.get('username', 'Not logged in')}")
+    logger.debug(f"Cookies: {request.cookies}")
+
 
 def fetch_songs_periodically():
     logger = logging.getLogger(__name__)
@@ -17,11 +35,15 @@ def fetch_songs_periodically():
     thread.start()
     logger.info("Kafka consumer thread started")
 
-@app.route('/upload', methods=['GET', 'POST'])
+@app.route('/')
+@app.route('/form', methods=['GET', 'POST'])
 def upload():
     try:
+        logger.info('username')
         if 'username' not in session:
-            return redirect(url_for('login'))
+            logger.info("redirecting to login")
+            logger.info('username')
+            return redirect('/user/login')
 
         if request.method == 'POST':
             handle_file_upload(request, app.config['UPLOAD_FOLDER'])
@@ -48,7 +70,8 @@ def upload():
 @app.route('/logout')
 def logout():
     session.pop('username', None)
-    return redirect(url_for('login'))
+    
+    return redirect('/user/login')
 
 if __name__ == '__main__':
     # Start the song consumer in the background when the app runs

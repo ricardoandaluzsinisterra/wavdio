@@ -5,7 +5,6 @@ import logging
 import time
 import os
 
-logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 TOPIC_NAME = 'songs'

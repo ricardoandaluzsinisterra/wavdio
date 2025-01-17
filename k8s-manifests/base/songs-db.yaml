@@ -1,43 +1,82 @@
-apiVersion: apps/v1
-kind: StatefulSet
+apiVersion: v1
+kind: ConfigMap
 metadata:
-  name: songs-db
-spec:
-  serviceName: "songs-db"
-  replicas: 1
-  selector:
-    matchLabels:
-      app: songs-db
-  template:
-    metadata:
-      labels:
-        app: songs-db
-    spec:
-      containers:
-      - name: songs-db
-        image: redis
-        ports:
-        - containerPort: 6379
-        volumeMounts:
-        - name: songs-db-storage
-          mountPath: /data
-  volumeClaimTemplates:
-  - metadata:
-      name: songs-db-storage
-    spec:
-      accessModes: ["ReadWriteOnce"]
-      resources:
-        requests:
-          storage: 1Gi
+  name: redis-config
+data:
+  master.conf: |
+    bind 0.0.0.0
+    port 6379
+    databases 16
+  slave.conf: |
+    bind 0.0.0.0
+    port 6379
+    databases 16
+    slaveof redis-0.redis 6379
+  sentinel.conf: |
+    port 26379
+    sentinel monitor mymaster redis-0.redis 6379 2
+    sentinel down-after-milliseconds mymaster 5000
+    sentinel failover-timeout mymaster 60000
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: songs-db-svc
+  name: redis
 spec:
+  clusterIP: None
   selector:
-    app: songs-db
+    app: redis
   ports:
-    - port: 6379
-      targetPort: 6379
+  - port: 6379
+    name: redis
+  - port: 26379
+    name: sentinel
 ---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis
+spec:
+  serviceName: redis
+  replicas: 3
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:6.2-alpine
+        command: ["sh", "-c", "if [ \"$(hostname)\" == \"redis-0\" ]; then redis-server /config/master.conf; else redis-server /config/slave.conf; fi"]
+        ports:
+        - containerPort: 6379
+          name: redis
+        volumeMounts:
+        - name: redis-config
+          mountPath: /config
+        - name: redis-data
+          mountPath: /data
+      - name: sentinel
+        image: redis:6.2-alpine
+        command: ["redis-sentinel", "/config/sentinel.conf"]
+        ports:
+        - containerPort: 26379
+          name: sentinel
+        volumeMounts:
+        - name: redis-config
+          mountPath: /config
+      volumes:
+      - name: redis-config
+        configMap:
+          name: redis-config
+  volumeClaimTemplates:
+  - metadata:
+      name: redis-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 5Gi

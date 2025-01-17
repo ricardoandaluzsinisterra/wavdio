@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request
 from kafka import KafkaProducer
-import redis
+from redis.sentinel import Sentinel
 import json
 import logging
 from Song import Song
@@ -8,15 +8,17 @@ import os
 
 app = Flask(__name__)
 
-SONGS_REDIS_HOST = os.getenv("SONGS_REDIS_HOST")
-USERS_REDIS_HOST = os.getenv("USERS_REDIS_HOST")
+REDIS_SENTINEL_HOST = os.getenv("REDIS_SENTINEL_HOST", "redis-0.redis")
+REDIS_SENTINEL_PORT = int(os.getenv("REDIS_SENTINEL_PORT", "26379"))
+KAFKA_SERVER = os.getenv("KAFKA_SERVER", "kafka:9092")
 
 logging.basicConfig(filename='app.log', level=logging.INFO)
 
-songs_db = redis.Redis(host=SONGS_REDIS_HOST, port=6379, db=0)
-users_db = redis.Redis(host=USERS_REDIS_HOST, port=6379, db=0)
+sentinel = Sentinel([(REDIS_SENTINEL_HOST, REDIS_SENTINEL_PORT)], socket_timeout=0.1)
+songs_db = sentinel.master_for('mymaster', socket_timeout=0.1, db=0)  # DB 0 for songs
+users_db = sentinel.master_for('mymaster', socket_timeout=0.1, db=1)  # DB 1 for users
 
-KAFKA_SERVER = os.getenv("KAFKA_SERVER", "kafka:9092")
+
 
 # Kafka producer configuration
 producer = KafkaProducer(bootstrap_servers=KAFKA_SERVER,

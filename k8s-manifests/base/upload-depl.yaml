@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: upload-depl
-        image: ricardoandaluz/upload:v5
+        image: ricardoandaluz/upload:v39
         ports:
         - containerPort: 443
         resources:
@@ -29,6 +29,12 @@ spec:
         env:
         - name: KAFKA_SERVER
           value: "kafka-svc.default.svc.cluster.local:9092"
+        - name: CATALOG_URL
+          value: "https://catalog-svc.default.svc.cluster.local:443"
+        - name: UPLOAD_URL
+          value: "https://upload-svc.default.svc.cluster.local:443"
+        - name: HOME_URL
+          value: "https://home-svc.default.svc.cluster.local:443"
         volumeMounts:
         - name: audio-storage
           mountPath: /usr/share/nginx/html/audio
@@ -51,3 +57,22 @@ spec:
       protocol: TCP
   selector:
     app: upload-depl
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: upload-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: upload-depl
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 80
