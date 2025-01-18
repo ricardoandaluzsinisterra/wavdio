@@ -16,9 +16,7 @@ resources:
   - load-balancers.yml
   - metallb-config.yml
   - player-depl.yaml
-  - songs-db.yaml
   - upload-depl.yaml
   - user-depl.yaml
-  - users-db.yaml
   - audio-storage.yaml
 

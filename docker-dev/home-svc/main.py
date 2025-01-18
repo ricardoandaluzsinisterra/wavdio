@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 import song_consumer
 import threading
 import logging
@@ -42,7 +42,7 @@ def home():
         if 'username' not in session:
             return redirect('/user/login')
         songs = song_consumer.get_songs()
-        logging.info(f"Retrieved {len(songs)} songs from consumer")
+        logger.info(f"Retrieved {len(songs)} songs from consumer")
         upload_url = os.getenv('UPLOAD_URL', '/upload')
         return render_template('home.html.j2', username=session['username'], all_songs=songs, upload_url=upload_url)
     except Exception as e:
@@ -50,6 +50,17 @@ def home():
 
 
 #Why was there an upload method here?
+
+@app.route('/liveness')
+def liveness():
+    logger.debug("Liveness probe accessed")
+    return jsonify(status="alive"), 200
+
+@app.route('/readiness')
+def readiness():
+    logger.debug("Readiness probe accessed")
+    # Add any necessary checks here
+    return jsonify(status="ready"), 200
 
 
 @app.route('/logout')

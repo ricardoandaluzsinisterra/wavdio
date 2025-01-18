@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, jsonify, render_template, request, redirect, url_for, session
 import threading
 from file_utils import handle_file_upload
 import song_consumer
@@ -66,6 +66,17 @@ def upload():
     except Exception as e:
         logging.error(f"Error during upload: {str(e)}")
         return render_template('upload.html.j2', username=session['username'],error=str(e))
+
+@app.route('/liveness')
+def liveness():
+    logger.debug("Liveness probe accessed")
+    return jsonify(status="alive"), 200
+
+@app.route('/readiness')
+def readiness():
+    logger.debug("Readiness probe accessed")
+    # Add any necessary checks here
+    return jsonify(status="ready"), 200
 
 @app.route('/logout')
 def logout():

@@ -27,26 +27,23 @@ def docker_build(service_path, service, build_env="dev"):
     
     build_command = f"docker build --build-arg build_env={build_env} -t {hub_repo}:{tag} {service_path}"
     
-    result = subprocess.run(build_command, shell=True, capture_output=True, text=True)
+    result = subprocess.run(build_command, shell=True, capture_output=True, text=True, errors='replace')
     print(result.stderr)
     
     update_version(service, current_version)
     return f"{hub_repo}:{tag}"
 
-
 services = ["catalog", "home", "player", "upload", "user"]
 build_env = 'prod'
-
 
 images = {
     service: docker_build(f"./{service}-svc", service, build_env)
     for service in services
 }
 
-
 for service, image in images.items():
     push_command = f"docker push {image}"
-    result = subprocess.run(push_command, shell=True, capture_output=True, text=True)
+    result = subprocess.run(push_command, shell=True, capture_output=True, text=True, errors='replace')
     print(f"Pushing {service}:")
     print(result.stderr)
     print(result.stdout)

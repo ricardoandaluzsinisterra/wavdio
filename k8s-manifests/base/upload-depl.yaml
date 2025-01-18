@@ -16,12 +16,12 @@ spec:
     spec:
       containers:
       - name: upload-depl
-        image: ricardoandaluz/upload:v39
+        image: ricardoandaluz/upload:v69
         ports:
         - containerPort: 443
         livenessProbe:
           httpGet:
-            path: /health
+            path: /liveness
             port: 443
             scheme: HTTPS
           initialDelaySeconds: 30
@@ -30,7 +30,7 @@ spec:
           failureThreshold: 3
         readinessProbe:
           httpGet:
-            path: /health
+            path: /readiness
             port: 443
             scheme: HTTPS
           initialDelaySeconds: 15

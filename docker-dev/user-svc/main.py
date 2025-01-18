@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from requests.exceptions import RequestException
 from user_authentication import validate_user, register_user, check_user
 import os
@@ -64,6 +64,17 @@ def register():
     except Exception as e:
         return render_template('register.html.j2', error=e)
     
+@app.route('/liveness')
+def liveness():
+    logger.debug("Liveness probe accessed")
+    return jsonify(status="alive"), 200
+
+@app.route('/readiness')
+def readiness():
+    logger.debug("Readiness probe accessed")
+    # Add any necessary checks here
+    return jsonify(status="ready"), 200
+
 @app.route('/logout')
 def logout():
     session.pop('username', None) 

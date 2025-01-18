@@ -13,15 +13,19 @@ spec:
     metadata:
       labels:
         app: catalog-depl
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/metrics"
+        prometheus.io/port: "443"
     spec:
       containers:
       - name: catalog-depl
-        image: ricardoandaluz/catalog:v39
+        image: ricardoandaluz/catalog:v73
         ports:
         - containerPort: 443
         livenessProbe:
           httpGet:
-            path: /health
+            path: /liveness
             port: 443
             scheme: HTTPS
           initialDelaySeconds: 30
@@ -30,7 +34,7 @@ spec:
           failureThreshold: 3
         readinessProbe:
           httpGet:
-            path: /health
+            path: /readiness
             port: 443
             scheme: HTTPS
           initialDelaySeconds: 15
@@ -46,9 +50,11 @@ spec:
             cpu: "250m"
         env:
         - name: REDIS_SENTINEL_HOST
-          value: "redis-0.redis"
+          value: "redis-sentinel.default.svc.cluster.local"
         - name: REDIS_SENTINEL_PORT
           value: "26379"
+        - name: REDIS_MASTER_NAME
+          value: "mymaster"
         - name: KAFKA_SERVER
           value: "kafka-svc.default.svc.cluster.local:9092"
         volumeMounts:

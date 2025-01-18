@@ -1,6 +1,7 @@
 flask==3.0.0
 pytest==7.4.0
 requests==2.31.0
-redis==5.0.1
+redis[sentinel]==5.0.1
 werkzeug==3.0.0
 kafka-python
+prometheus-client==0.17.1
