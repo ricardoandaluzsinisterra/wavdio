@@ -11,7 +11,7 @@
             <br>
             <a href="/upload"><img src="{{ url_for('static', filename='image/upload.png') }}" alt="Upload Icon"> Upload</a>
             <br>
-            <a href="{{ url_for('logout') }}"><img src="{{ url_for('static', filename='image/logout.png') }}" alt="Logout Icon"> Logout</a>
+            <a href="/logout"><img src="{{ url_for('static', filename='image/logout.png') }}" alt="Logout Icon"> Logout</a>
             <div class="user-info">
                 <img src="{{ url_for('static', filename='image/hp.jpg') }}" alt="User Picture">
                 <p>{{ username }}</p>
@@ -21,7 +21,7 @@
     <div class="main">
         <h1>Upload</h1>
         <br>
-        <form class="upload-form" action="https://localhost/upload/upload" method="post" enctype="multipart/form-data">
+        <form class="upload-form" action="/form" method="post" enctype="multipart/form-data">
             <input class="upload-form-input" type="text" name="title" placeholder="Song Title" required>
             <br>
             <input class="upload-form-input" type="text" name="author" placeholder="Author" required>

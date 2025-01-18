@@ -12,6 +12,8 @@ from exceptions import *
 from Song import Song
 
 songs  = []
+CATALOG_URL = os.getenv('CATALOG_URL', '/catalog')
+
 
 def song_exists(song):
     global songs
@@ -49,7 +51,7 @@ def handle_file_upload(request, upload_folder):
         filename = f"{title}.mp3"
         file.save(os.path.join(upload_folder, filename))
         
-        response = requests.post('https://localhost/catalog/songs', json=song.to_dict(), verify=False)
+        response = requests.post(f'{CATALOG_URL}/songs', verify=False, json=song.to_dict())
         if response.status_code != 201:
             raise SongError(f'Failed to add song: {response.status_code}, {response.text}')
 

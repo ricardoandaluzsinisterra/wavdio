@@ -1,12 +1,23 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 import song_consumer
 import logging
 import threading
 import os
+import sys
 
-app = Flask(__name__)
+static_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
+
+logger = logging.getLogger('catalog-service')
+logger.setLevel(logging.INFO)
+handler = logging.StreamHandler(sys.stdout)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+
+app = Flask(__name__, 
+           static_folder=static_folder,
+           static_url_path='/static')
 app.secret_key = 'jese'
-logging.basicConfig(level=logging.DEBUG)
 
 def fetch_songs_periodically():
     logger = logging.getLogger(__name__)
@@ -70,6 +81,17 @@ def player(song_title):
         return render_template('error.html.j2',
                              error=f"Error playing song: {str(e)}",
                              username=session.get('username'))
+        
+@app.route('/liveness')
+def liveness():
+    logger.debug("Liveness probe accessed")
+    return jsonify(status="alive"), 200
+
+@app.route('/readiness')
+def readiness():
+    logger.debug("Readiness probe accessed")
+    # Add any necessary checks here
+    return jsonify(status="ready"), 200
     
 @app.route('/logout')
 def logout():

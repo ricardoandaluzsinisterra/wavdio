@@ -1,11 +1,14 @@
 import requests
+import os
 from exceptions import *
 from werkzeug.security import generate_password_hash, check_password_hash
+
+CATALOG_URL = os.getenv('CATALOG_URL', '/catalog')
 
 def validate_user(username, password, confirm_password):
     if password != confirm_password:
         raise LoginError("Passwords do not match.")
-    response = requests.get(f'https://localhost/catalog/users/{username}', verify=False)
+    response = requests.get(f'{CATALOG_URL}/users/{username}', verify=False)
     if response.status_code == 200 and response.json():
         raise LoginError("Registration failed. Please try again.")
 
@@ -15,12 +18,12 @@ def register_user(username, password):
         'username': username,
         'password': hashed_password
     }
-    response = requests.post('https://localhost/catalog-svc/users', json=user_data, verify=False)
+    response = requests.post(f'{CATALOG_URL}/users', json=user_data, verify=False)
     if response.status_code != 201:
         raise LoginError(f'Failed to register user: {response.status_code} {response.content}')
 
 def check_user(username, password):
-    response = requests.get(f'https://localhost/catalog-svc/users/{username}', verify=False)
+    response = requests.get(f'{CATALOG_URL}/users/{username}', verify=False)
     if response.status_code != 200:
         raise LoginError(f'Login failed. Please try again.')
     user = response.json()

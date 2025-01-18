@@ -1,0 +1,19 @@
+auth:
+  enabled: true
+  sentinel: true 
+
+sentinel:
+  enabled: true 
+  usePassword: true
+  password: sentinel-password 
+
+redis:
+  usePassword: true
+  password: password 
+  databases: 2 
+
+cluster:
+  enabled: false 
+
+replica:
+  replicaCount: 2 
